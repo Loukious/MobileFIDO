@@ -1,0 +1,35 @@
+name: Source CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Test native CTAPHID
+        working-directory: native-ctaphid
+        run: cargo test --locked --all-targets
+
+  public-safety:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Shell syntax
+        run: |
+          bash -n android-helper/build-local.sh
+          bash -n native-tools/verify_release_candidate.sh
+          sh -n native-tools/customize.sh
+          find ksu-native-module -type f -name '*.sh' -print0 | xargs -0 -n1 sh -n
+      - name: Reject accidentally committed private signing material
+        run: |
+          if find . -type f \( -name '*.jks' -o -name '*.keystore' -o -name '*.p12' -o -name '*.pfx' -o -name '*.pem' -o -name '*.key' -o -name '*.mobilefido' \) -print -quit | grep -q .; then
+            echo 'Private signing/recovery material must not be committed.' >&2
+            exit 1
+          fi

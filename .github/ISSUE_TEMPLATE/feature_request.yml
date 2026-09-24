@@ -1,0 +1,22 @@
+name: Feature request
+description: Propose a MobileFIDO feature or compatibility improvement
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / use case
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+    validations:
+      required: true
+  - type: textarea
+    id: security
+    attributes:
+      label: Security and compatibility considerations
+      description: Note effects on biometric authorization, key storage, recovery, package identity or USB behavior.

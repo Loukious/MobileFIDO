@@ -1,0 +1,43 @@
+name: Bug report
+description: Report a reproducible MobileFIDO problem that is not a sensitive vulnerability
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not post private keys, recovery archives, signing keystores, credential IDs, account identifiers or exploitable security details here. Use SECURITY.md for sensitive reports.
+  - type: input
+    id: version
+    attributes:
+      label: MobileFIDO version
+      placeholder: 5.1.1-dev
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device / Android / root environment
+      placeholder: Device model, Android version, KernelSU version
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Include expected vs actual behavior and safe/redacted logs if useful.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: I removed secrets, credential/account identifiers and recovery material from this report.
+          required: true

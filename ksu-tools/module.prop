@@ -1,0 +1,6 @@
+id=pocof7_ctap3b
+name=Poco F7 CTAP3B Development
+version=3.0.0-dev
+versionCode=30000
+author=Poco F7 CTAP3B contributors
+description=Localhost-only experimental FIDO2 Android Keystore bridge. Not certified. Keeps existing USB gadget and credentials unchanged.

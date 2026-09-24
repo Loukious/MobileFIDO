@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.pocof7.ctap3b">
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+    <!-- Start the previously installed/enabled listener once credential
+         encrypted app data is available after the first device unlock. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- User-opt-in alert for pending CTAP requests, not required to sign. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Long-running local hardware-key listener; no network or background UI. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-feature android:name="android.hardware.fingerprint" android:required="false" />
+    <application
+        android:allowBackup="false"
+        android:debuggable="false"
+        android:theme="@style/MobileFIDOTheme"
+        android:icon="@drawable/ic_pocokey"
+        android:roundIcon="@drawable/ic_pocokey"
+        android:label="MobileFIDO DEV"
+        android:usesCleartextTraffic="false">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <receiver
+            android:name=".BootReceiver"
+            android:exported="true"
+            android:directBootAware="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+        <service
+            android:name=".HelperService"
+            android:exported="false"
+            android:stopWithTask="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="User-enabled local USB FIDO2 security-key service waiting for biometric authorization" />
+        </service>
+    </application>
+</manifest>

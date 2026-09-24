@@ -1,0 +1,41 @@
+# Security boundary: NEVER commit APK signing private keys or credentials.
+*.jks
+*.keystore
+keystore.properties
+*.p12
+*.pfx
+*.pem
+*.key
+.env
+.env.*
+!.env.example
+
+# Generated output; use inspected release artifacts rather than git blobs.
+android-helper/app/build/
+android-helper/.gradle/
+native-ctaphid/target/
+native-tools/dist/
+ksu-tools/dist/
+ksu-module/dist/
+tmp-ui/
+**/__pycache__/
+*.pyc
+*.log
+.idea/
+.vscode/
+.DS_Store
+
+# Real or local-test authenticator/account metadata can be identifying.
+windows/local-test-credential.json
+windows/local-test-keystore-credential.json
+*.ctap3b
+*.ctap3b-catalog
+*.mobilefido
+
+# Local release signing / output must be published as GitHub Release assets,
+# never as repository blobs.
+mobilefido-signing/
+
+# Historical local fixture: keep source/tests public, but do not distribute the
+# opaque development-signed APK as a source-tree blob.
+ksu-tools/approved-legacy-helper.apk

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Native vector launcher icon: no imported fonts, bitmap assets or SDKs. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#0B1220"
+        android:pathData="M25,4 L83,4 C95,4 104,13 104,25 L104,83 C104,95 95,104 83,104 L25,104 C13,104 4,95 4,83 L4,25 C4,13 13,4 25,4 Z" />
+    <path
+        android:fillColor="#93C5FD"
+        android:pathData="M54,16 L87,30 L87,54 C87,75 75,90 54,101 C33,90 21,75 21,54 L21,30 Z" />
+    <path
+        android:fillColor="#172236"
+        android:pathData="M54,25 L78,36 L78,55 C78,70 69,82 54,91 C39,82 30,70 30,55 L30,36 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,41 C47.9,41 43,45.9 43,52 C43,56.3 45.4,60 49,61.8 L49,76 L59,76 L59,61.8 C62.6,60 65,56.3 65,52 C65,45.9 60.1,41 54,41 Z" />
+    <path
+        android:fillColor="#172236"
+        android:pathData="M54,47 C51.2,47 49,49.2 49,52 C49,54.8 51.2,57 54,57 C56.8,57 59,54.8 59,52 C59,49.2 56.8,47 54,47 Z" />
+</vector>

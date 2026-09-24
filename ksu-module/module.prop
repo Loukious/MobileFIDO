@@ -1,0 +1,6 @@
+id=pocof7_ctap3b
+name=Poco F7 CTAP2 Hardware Key (Development)
+version=0.1.0-dev
+versionCode=1
+author=Local development
+description=AndroidKeyStore CTAP2 root daemon; cautious ADB-preserving USB HID provisioning. Requires separate app foreground for biometric authorization.

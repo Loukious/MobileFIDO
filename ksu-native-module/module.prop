@@ -1,0 +1,6 @@
+id=pocof7_ctap_native
+name=MobileFIDO — Android FIDO2 Security Key (Development)
+version=5.1.1-dev
+versionCode=50101
+author=MobileFIDO contributors
+description=MobileFIDO native ARM64 FIDO2 ES256 with per-use biometric hardware signing, recoverable CXF-shaped passkey archives, and legacy device-bound compatibility. Experimental; Android 17 onyx is the first validated device.
