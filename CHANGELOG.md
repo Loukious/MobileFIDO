@@ -1,9 +1,11 @@
 # Changelog
 
-## 5.1.1-dev — 2026-09-24
+## Unreleased
 
 - Credential catalog creation timestamps now show both the local date and time
   instead of date only.
+
+## 5.1.1-dev — 2026-09-24
 
 ### Security and signing
 
