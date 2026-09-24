@@ -2,6 +2,9 @@
 
 ## 5.1.1-dev — 2026-09-24
 
+- Credential catalog creation timestamps now show both the local date and time
+  instead of date only.
+
 ### Security and signing
 
 - Migrated the maintained build/package pipeline to the owner's long-term

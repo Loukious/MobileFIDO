@@ -42,6 +42,16 @@ class MobileFidoUiConsistencyTests(unittest.TestCase):
         self.assertIn('deleteParams.setMarginStart(dp(12))', SOURCE)
         self.assertNotIn('button("Delete this credential", false)', SOURCE)
 
+    def test_saved_credential_creation_timestamp_shows_date_and_time(self):
+        catalog = SOURCE.split(
+            'for (CryptoKeyManager.CredentialInfo entry : group.getValue()) {', 1)[1]
+        catalog = catalog.split('TextView delete = credentialDeleteAction(', 1)[0]
+        self.assertIn(
+            'DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)',
+            catalog,
+        )
+        self.assertNotIn('DateFormat.getDateInstance(DateFormat.MEDIUM)', catalog)
+
     def test_app_owned_dialogs_share_styled_surface_and_actions(self):
         self.assertIn('private LinearLayout dialogContent(', SOURCE)
         self.assertIn('private AlertDialog.Builder styledDialog(', SOURCE)

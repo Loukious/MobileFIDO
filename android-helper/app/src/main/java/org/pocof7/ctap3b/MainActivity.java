@@ -763,7 +763,7 @@ public final class MainActivity extends Activity implements HelperService.UiBrid
                     details.addView(text(entry.displayName, 13, muted, false));
                 }
                 String created = entry.createdAtMillis > 0
-                    ? DateFormat.getDateInstance(DateFormat.MEDIUM)
+                    ? DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
                         .format(new Date(entry.createdAtMillis))
                     : "Date unknown (legacy registration)";
                 String recovery;
