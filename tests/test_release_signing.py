@@ -3,6 +3,7 @@
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -20,6 +21,56 @@ LEGACY_DEV_CERT = "3f133472fa0066963cc16ae19a6250e275e7f0f8265589dc5a0b05f746d20
 
 
 class ReleaseSigningTests(unittest.TestCase):
+    @unittest.skipUnless(os.name == "posix" and shutil.which("bash"),
+                         "POSIX shell required for the isolated build harness")
+    def test_clean_checkout_creates_private_output_before_compiling(self):
+        # All signing/SDK tools are inert doubles. No real APK, key or phone
+        # is used; reaching the fake compiler proves clean output setup works.
+        with tempfile.TemporaryDirectory(prefix="mobilefido-clean-build-") as root:
+            working = Path(root)
+            helper = working / "android-helper"
+            (helper / "app/src/main/java").mkdir(parents=True)
+            script = helper / "build-local.sh"
+            script.write_text(BUILD.read_text(), encoding="utf-8")
+            sdk = working / "sdk"
+            tools = sdk / "build-tools/35.0.0"
+            tools.mkdir(parents=True)
+            platform = sdk / "platforms/android-35/android.jar"
+            platform.parent.mkdir(parents=True)
+            platform.touch()
+            jdk_bin = working / "jdk/bin"
+            jdk_bin.mkdir(parents=True)
+            mocks = working / "mock-bin"
+            mocks.mkdir()
+            for path, body in (
+                (tools / "aapt2", "exit 0"),
+                (jdk_bin / "keytool", "printf 'test certificate'"),
+                (jdk_bin / "javac", "echo COMPILER_REACHED >&2; exit 37"),
+                (mocks / "sha256sum", f"cat >/dev/null; echo '{EXPECTED_CERT}  -'"),
+            ):
+                path.write_text("#!/bin/sh\n" + body + "\n", encoding="utf-8")
+                path.chmod(0o755)
+            keystore = working / "inert-test-keystore"
+            keystore.write_text("not a signing key", encoding="utf-8")
+            env = dict(os.environ)
+            env.update({
+                "JAVA_HOME": str(jdk_bin.parent),
+                "ANDROID_SDK_ROOT": str(sdk),
+                "ANDROID_BUILD_TOOLS": str(tools),
+                "MOBILEFIDO_KEYSTORE": str(keystore),
+                "MOBILEFIDO_STOREPASS": "inert-test-only",
+                "MOBILEFIDO_KEYPASS": "inert-test-only",
+                "PATH": str(mocks) + os.pathsep + env.get("PATH", ""),
+            })
+            attempt = subprocess.run(["bash", str(script)], env=env,
+                                     text=True, capture_output=True, check=False,
+                                     timeout=10)
+            self.assertEqual(attempt.returncode, 37, attempt.stderr)
+            self.assertIn("COMPILER_REACHED", attempt.stderr)
+            output = helper / "app/build/manual"
+            self.assertTrue((output / "classes").is_dir())
+            self.assertEqual(output.stat().st_mode & 0o777, 0o700)
+
     def test_release_gate_uses_release_signed_artifact_without_claiming_certification(self):
         gate = RELEASE_GATE.read_text()
         self.assertIn("release-SIGNED development candidate", gate)

@@ -1,0 +1,2 @@
+# Android and Linux execute these scripts directly, including Windows clones.
+*.sh text eol=lf

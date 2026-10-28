@@ -20,6 +20,8 @@ const INVALID_SEQ: u8 = 0x04;
 const MSG_TIMEOUT: u8 = 0x05;
 const BUSY: u8 = 0x06;
 const INVALID_CHANNEL: u8 = 0x0b;
+const CTAP_KEEPALIVE_CANCEL: u8 = 0x2d;
+const CAPABILITIES: u8 = 0x04 | 0x08; // CBOR and NMSG (no legacy MSG/U2F).
 const MAX_CHANNELS: usize = 8;
 const INCOMPLETE_TIMEOUT: Duration = Duration::from_secs(5);
 const IDLE_TIMEOUT: Duration = Duration::from_secs(30);
@@ -197,6 +199,21 @@ impl Engine {
             return self.continuation(packet, cid, marker, now);
         }
         let command = marker & 0x7f;
+        let length = u16::from_be_bytes([packet[5], packet[6]]) as usize;
+        // CANCEL is out-of-band: it never starts/reassembles a transaction
+        // and must be silent on a non-active CID, including an unknown one.
+        // Complete the original CBOR request exactly once, then discard late
+        // worker replies with the existing job/cancellation checks.
+        if command == CANCEL {
+            if length != 0 || !self.active.contains_key(&cid) {
+                return vec![];
+            }
+            self.abort(cid);
+            if let Some(channel) = self.channels.get_mut(&cid) {
+                channel.last_used = now;
+            }
+            return vec![send(cid, CBOR, &[CTAP_KEEPALIVE_CANCEL])];
+        }
         if cid == BROADCAST {
             if command != INIT {
                 return vec![error(cid, INVALID_CHANNEL)];
@@ -208,13 +225,12 @@ impl Engine {
             if self.active.contains_key(&cid) {
                 if command == INIT {
                     self.abort(cid);
-                } else if command != CANCEL {
+                } else {
                     return vec![error(cid, BUSY)];
                 }
             }
         }
         self.pending.remove(&cid); // Restart an incomplete request on this CID.
-        let length = u16::from_be_bytes([packet[5], packet[6]]) as usize;
         if length > MAX_MESSAGE {
             return vec![error(cid, INVALID_LEN)];
         }
@@ -279,15 +295,11 @@ impl Engine {
                 let mut info = data;
                 info.extend_from_slice(&new_cid.to_be_bytes());
                 // CTAPHID protocol v2; self-assigned dev firmware 0.1.0,
-                // CBOR only: do not advertise unsupported U2F/MSG/LOCK.
-                info.extend_from_slice(&[2, 0, 1, 0, 0x04]);
+                // NMSG must be set explicitly: omitting it claims MSG support.
+                info.extend_from_slice(&[2, 0, 1, 0, CAPABILITIES]);
                 vec![send(cid, INIT, &info)]
             }
             PING => vec![send(cid, PING, &data)],
-            CANCEL => {
-                self.abort(cid);
-                vec![]
-            }
             CBOR => {
                 if self.active.len() >= MAX_CHANNELS {
                     return vec![error(cid, BUSY)];
@@ -378,7 +390,7 @@ mod tests {
             let cid = u32::from_be_bytes(packets[0][15..19].try_into().unwrap());
             assert_ne!(cid, BROADCAST);
             assert_eq!(packets[0][4], INIT | 0x80);
-            assert_eq!(packets[0][23], 0x04);
+            assert_eq!(packets[0][23], CAPABILITIES);
             cid
         } else {
             panic!("not INIT response")
@@ -448,7 +460,12 @@ mod tests {
             assert_eq!(x[0][4], KEEPALIVE | 0x80);
             assert_eq!(x[0][7], 2);
         }
-        assert!(e.ingest(&req(cid, CANCEL, &[])[0], t).is_empty());
+        let cancelled = e.ingest(&req(cid, CANCEL, &[])[0], t);
+        if let Action::Send(reports) = &cancelled[0] {
+            assert_eq!(reports, &req(cid, CBOR, &[CTAP_KEEPALIVE_CANCEL]));
+        } else {
+            panic!("missing terminal CBOR cancellation response");
+        }
         assert!(flag.load(Ordering::Acquire));
         assert!(e.finished(cid, job, vec![0]).is_empty());
     }

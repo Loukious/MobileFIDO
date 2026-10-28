@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- Full recovery checks the combined existing/imported credential count before
+  hardware changes. Overlapping credentials count once, and an overflowing
+  restore is refused before it can create a catalog too large to back up.
+- Native CTAPHID cancellation now completes the original CBOR request with
+  `CTAP2_ERR_KEEPALIVE_CANCEL`, ignores inactive/malformed CANCEL packets, and
+  preserves late-worker/reconnect isolation. Cancelling an inactive channel
+  no longer discards a partially received request.
+- Native INIT now sets `CAPABILITY_NMSG` explicitly, so clients do not mistake
+  this CBOR-only authenticator for a legacy U2F/MSG device.
+- The Android release builder creates its private output directory before
+  changing permissions, allowing clean checkouts to reach compilation. A
+  host-only regression runs in CI using inert signing/SDK tool doubles.
+- Shell scripts retain LF line endings in Windows checkouts so they remain
+  executable by Android and Linux shells.
 - Credential catalog creation timestamps now show both the local date and time
   instead of date only.
 
