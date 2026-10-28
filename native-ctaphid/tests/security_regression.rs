@@ -78,7 +78,9 @@ fn all_busy_channels_cannot_be_evicted_or_admit_another_worker() {
     }
     status(&send(&mut engine, BROADCAST, INIT, b"abcdefgh", t), BROADCAST, 0x06);
     let (cid, job, cancelled) = &running[0];
-    assert!(send(&mut engine, *cid, CANCEL, &[], t).is_empty());
+    let cancelled_response = send(&mut engine, *cid, CANCEL, &[], t);
+    assert_eq!(reports(&cancelled_response[0])[0][4], CBOR | 0x80);
+    assert_eq!(reports(&cancelled_response[0])[0][7], 0x2d);
     assert!(cancelled.load(Ordering::Acquire));
     assert!(engine.finished(*cid, *job, vec![0]).is_empty());
     let replacement = allocate(&mut engine, t);

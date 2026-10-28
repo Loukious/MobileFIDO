@@ -71,6 +71,7 @@ if [[ "${CERT_SHA}" != "${APPROVED_CERT_SHA}" ]]; then
 fi
 
 OUTPUT="app/build/manual"
+mkdir -p -- "${OUTPUT}"
 chmod 700 -- "${OUTPUT}"
 # Retain last-known-good signed APKs, but never leak a class/resource removed
 # from source into the NEXT APK. The signing keystore is external to OUTPUT.

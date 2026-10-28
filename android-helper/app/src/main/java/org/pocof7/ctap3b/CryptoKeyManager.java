@@ -1296,13 +1296,22 @@ final class CryptoKeyManager {
             throw new IllegalArgumentException("Invalid recoverable credential set");
         }
         Set<String> ids = new HashSet<>();
+        for (RecoveryEntry entry : entries) {
+            validateRecoveryEntry(entry);
+            if (!ids.add(encode(entry.credentialId))) {
+                throw new IllegalArgumentException("Duplicate credential ID");
+            }
+        }
+        // An archive can fit by itself while overflowing the merged phone
+        // catalog. That would make the next full backup impossible. Check
+        // the union before importing/re-wrapping any key; overlaps count once.
+        CredentialCapacity.requireRestoreFits(
+            metadata.getAll().keySet(), ids, BackupManager.MAX_CREDENTIALS);
         List<StagedRecoveryImport> staged = new ArrayList<>();
         int already = 0;
         try {
             for (RecoveryEntry entry : entries) {
-                validateRecoveryEntry(entry);
                 String id = encode(entry.credentialId);
-                if (!ids.add(id)) throw new IllegalArgumentException("Duplicate credential ID");
                 ECPublicKey archivedPublic = publicFromCoordinates(entry.publicX, entry.publicY);
                 verifyPair(entry.privateKeyPkcs8, archivedPublic, id, entry.rpId);
 
